@@ -1,8 +1,10 @@
-from datetime import datetime
 import sqlite3
 import hashlib
 import os
 import pandas as pd
+from datetime import datetime
+
+
 
 DB_NAME = "finsecure.db"
 
@@ -158,3 +160,34 @@ def delete_record(table, record_id, user_id):
     )
     conn.commit()
     conn.close()
+    # ---------- Login tracking ----------
+def record_login(user_id):
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO login_log (user_id, login_time) VALUES (?, ?)",
+        (user_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_login_stats():
+    conn = get_connection()
+    today = datetime.now().strftime("%Y-%m-%d") + "%"
+    total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+    total_logins = conn.execute("SELECT COUNT(*) FROM login_log").fetchone()[0]
+    logins_today = conn.execute(
+        "SELECT COUNT(*) FROM login_log WHERE login_time LIKE ?", (today,)
+    ).fetchone()[0]
+    users_today = conn.execute(
+        "SELECT COUNT(DISTINCT user_id) FROM login_log WHERE login_time LIKE ?",
+        (today,),
+    ).fetchone()[0]
+    recent = pd.read_sql_query(
+        "SELECT users.username, login_log.login_time FROM login_log "
+        "JOIN users ON users.id = login_log.user_id "
+        "ORDER BY login_log.id DESC LIMIT 20",
+        conn,
+    )
+    conn.close()
+    return total_users, total_logins, logins_today, users_today, recent
