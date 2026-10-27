@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import date
 import db
+ADMIN_USERNAME = "your_username_here"
 
 st.set_page_config(page_title="FinSecure", page_icon="🔐", layout="wide")
 db.init_db()
@@ -23,6 +24,7 @@ def login_page():
         if st.button("Login"):
             uid = db.verify_user(u, p)
             if uid:
+                 db.record_login(uid)
                 st.session_state.user_id = uid
                 st.session_state.username = u
                 st.rerun()
@@ -67,6 +69,20 @@ def main_page():
     tab1, tab2, tab3, tab4 = st.tabs(
         ["📊 Dashboard", "💸 Income & Expenses", "🏠 Assets", "🏦 Loans"]
     )
+    # ----- Admin stats (only visible to the admin account) -----
+    if st.session_state.username == ADMIN_USERNAME:
+        st.divider()
+        st.subheader("🛠 Admin: Usage stats")
+        total_users, total_logins, logins_today, users_today, recent = (
+            db.get_login_stats()
+        )
+        a1, a2, a3, a4 = st.columns(4)
+        a1.metric("Registered users", total_users)
+        a2.metric("Total logins", total_logins)
+        a3.metric("Logins today", logins_today)
+        a4.metric("Unique users today", users_today)
+        st.write("**Last 20 logins**")
+        st.dataframe(recent) 
 
     # ----- Income & Expenses -----
     with tab2:
