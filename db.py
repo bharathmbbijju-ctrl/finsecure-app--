@@ -4,8 +4,6 @@ import os
 import pandas as pd
 from datetime import datetime
 
-
-
 DB_NAME = "finsecure.db"
 
 
@@ -40,7 +38,7 @@ def init_db():
         name TEXT NOT NULL,
         amount REAL NOT NULL,
         interest_rate REAL NOT NULL)""")
-        c.execute("""CREATE TABLE IF NOT EXISTS login_log (
+    c.execute("""CREATE TABLE IF NOT EXISTS login_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         login_time TEXT NOT NULL)""")
@@ -160,7 +158,9 @@ def delete_record(table, record_id, user_id):
     )
     conn.commit()
     conn.close()
-    # ---------- Login tracking ----------
+
+
+# ---------- Login tracking ----------
 def record_login(user_id):
     conn = get_connection()
     conn.execute(
