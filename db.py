@@ -38,6 +38,10 @@ def init_db():
         name TEXT NOT NULL,
         amount REAL NOT NULL,
         interest_rate REAL NOT NULL)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS login_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        login_time TEXT NOT NULL)""")
     conn.commit()
     conn.close()
 
