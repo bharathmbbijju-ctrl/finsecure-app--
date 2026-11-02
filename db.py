@@ -191,3 +191,22 @@ def get_login_stats():
     )
     conn.close()
     return total_users, total_logins, logins_today, users_today, recent
+def get_user_details():
+    conn = get_connection()
+    users = pd.read_sql_query(
+        "SELECT users.id AS user_id, users.username, "
+        "COUNT(login_log.id) AS total_logins, "
+        "MAX(login_log.login_time) AS last_login "
+        "FROM users LEFT JOIN login_log ON users.id = login_log.user_id "
+        "GROUP BY users.id ORDER BY last_login DESC",
+        conn,
+    )
+    history = pd.read_sql_query(
+        "SELECT login_log.id AS log_id, users.id AS user_id, "
+        "users.username, login_log.login_time "
+        "FROM login_log JOIN users ON users.id = login_log.user_id "
+        "ORDER BY login_log.id DESC",
+        conn,
+    )
+    conn.close()
+    return users, history
