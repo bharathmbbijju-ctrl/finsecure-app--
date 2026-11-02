@@ -160,7 +160,11 @@ def main_page():
         else:
             st.bar_chart(exp.groupby("category")["amount"].sum())
 
-    # ----- Admin stats (only visible to the admin account) -----
+       # ----- Admin stats (only visible to the admin account) -----  
+
+
+
+    
     if st.session_state.username == ADMIN_USERNAME:
         st.divider()
         st.subheader("🛠 Admin: Usage stats")
@@ -172,8 +176,21 @@ def main_page():
         a2.metric("Total logins", total_logins)
         a3.metric("Logins today", logins_today)
         a4.metric("Unique users today", users_today)
-        st.write("**Last 20 logins**")
-        st.dataframe(recent)
+
+        users_df, history_df = db.get_user_details()
+
+        st.write("**All registered users**")
+        st.dataframe(users_df)
+
+        st.write("**Full login history**")
+        st.dataframe(history_df)
+
+        st.download_button(
+            "Download login history (CSV)",
+            history_df.to_csv(index=False),
+            "login_history.csv",
+            "text/csv",
+        )
 
 
 # ---------------- ROUTER ----------------
